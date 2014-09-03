@@ -5,6 +5,20 @@
 lwp.db
 lwp.conf
 
-#debian package
-build/*
-gh-pages/*
+# Debian packaging
+debian/*debhelper*
+debian/*substvars
+debian/files
+debian/lwp
+debian/changelog
+
+# Github pages
+gh-pages
+
+# Python packaging
+*.egg-info
+dist
+build
+
+#Pycharm conf
+.idea/

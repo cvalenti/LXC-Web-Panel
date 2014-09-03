@@ -15,13 +15,18 @@ On ubuntu 12.04 you should install:
 Installation
 ------------
 
-You can download latest debian packages from http://claudyus.github.io/LXC-Web-Panel/download.html than install it:
+You can download latest debian packages from http://claudyus.github.io/LXC-Web-Panel/download.html or, better, you can also use the lwp debian repo:
 
 ::
 
-  $ sudo dpkg -i lwp_VERSION.deb
-  $ sudo apt-get install -f # install lwp dependencies
+  $ wget -O - http://claudyus.github.io/LXC-Web-Panel/claudyus.gpg.key | sudo apt-key add -
+  $ echo "deb http://claudyus.github.io/LXC-Web-Panel/ debian/" | sudo tee /etc/apt/sources.list.d/lwp.list
+  $ sudo apt-get update
+  $ sudo apt-get install lwp
 
+Beware: The repository system was reorganize after the 0.6 release. See `this blog post <http://claudyus.github.io/LXC-Web-Panel/posts/02-reorganize-deb-repo.html>`_ for more information
+
+Note: you can also include the debian-testing repo inside your source.list file to receive release candidate build.
 
 Configuration
 -------------
@@ -50,11 +55,21 @@ Where mykey.key and mykey.cert are the key and the certificate generated previou
 
  openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout mykey.key -out mykey.cert
 
-LDAP configuration
-^^^^^^^^^^^^^^^^^^
+Authentication
+^^^^^^^^^^^^^^
+
+Default authentication is against the internal sqlite database, but it's possible to configure alternative backends.
+
+LDAP
+++++
 
 To enable ldap auth you should set ``auth`` type to ``ldap`` inside your config file than configure all options inside ldap section.
 See lwp.example.conf for references.
+
+htpasswd
+++++++++
+
+To enable authentication agains htpasswd file you should set ``auth`` type to ``htpasswd`` and ``file`` variable in ``htpasswd`` section to point to the htpasswd file.
 
 File-bucket configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^
