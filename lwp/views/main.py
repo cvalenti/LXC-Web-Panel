@@ -44,12 +44,16 @@ def home():
         containers_by_status = []
 
         for container in listx[status]:
-            containers_by_status.append({
+            container_info = {
                 'name': container,
-                'memusg': lwp.memory_usage(container),
                 'settings': lwp.get_container_settings(container),
+                'memusg': 0,
                 'bucket': get_bucket_token(container)
-            })
+            }
+            if container in listx['RUNNING']:
+                container_info['memusg'] = lwp.memory_usage(container)
+
+            containers_by_status.append(container_info)
         containers_all.append({
             'status': status.lower(),
             'containers': containers_by_status
@@ -89,6 +93,12 @@ def edit(container=None):
         #convert boolean in correct value for lxc, if checkbox is inset value is not submitted inside POST
         form['flags'] = 'up' if 'flags' in form else 'down'
         form['start_auto'] = '1' if 'start_auto' in form else '0'
+
+        # if memlimits/memswlimit is at max values unset form values
+        if int(form['memlimit']) == host_memory['total']:
+            form['memlimit'] = ''
+        if int(form['swlimit']) == host_memory['total'] * 2:
+            form['swlimit'] = ''
 
         for option in form.keys():
             #if the key is supported AND is different

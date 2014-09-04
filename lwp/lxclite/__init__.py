@@ -20,11 +20,11 @@ def _run(cmd, output=False):
     """
     if output:
         try:
-            out = subprocess.check_output('{}'.format(cmd), shell=True)
+            out = subprocess.check_output('{}'.format(cmd), shell=True, close_fds=True)
         except subprocess.CalledProcessError:
             out = False
         return out
-    return subprocess.check_call('{}'.format(cmd), shell=True)  # returns 0 for True
+    return subprocess.check_call('{}'.format(cmd), shell=True, close_fds=True)  # returns 0 for True
 
 
 def exists(container):
@@ -116,14 +116,19 @@ def listx():
     stopped = []
     frozen = []
     running = []
+    status_container = {}
+
+    outcmd = _run('lxc-ls --fancy | tail -n+3', output=True).splitlines()
+
+    for line in outcmd:
+        status_container[line.split()[0]] = line.split()[1:]
 
     for container in ls():
-        state = info(container)['state']
-        if state == 'RUNNING':
+        if status_container[container][0] == 'RUNNING':
             running.append(container)
-        elif state == 'FROZEN':
-            frozen.append(container)
-        elif state == 'STOPPED':
+        if status_container[container][0] == 'STOPPED':
+            stopped.append(container)
+        if status_container[container][0] == 'FROZEN':
             stopped.append(container)
 
     return {'RUNNING': running,
