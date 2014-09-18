@@ -46,12 +46,10 @@ def home():
         for container in listx[status]:
             container_info = {
                 'name': container,
-                'settings': lwp.get_container_settings(container),
+                'settings': lwp.get_container_settings(container, status),
                 'memusg': 0,
                 'bucket': get_bucket_token(container)
             }
-            if container in listx['RUNNING']:
-                container_info['memusg'] = lwp.memory_usage(container)
 
             containers_by_status.append(container_info)
         containers_all.append({

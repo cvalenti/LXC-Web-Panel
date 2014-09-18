@@ -15,7 +15,8 @@ cgroup_ext is a data structure where for each input of edit.html we have an arra
     position 1: the regex to validate the field
     position 2: the flash message to display on success.
 """
-ip_regex = '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
+ip_regex = '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
+cidr_regex = '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(\d|[1-2]\d|3[0-2]))*$'
 file_match = '^[\w.-/]+$'
 
 cgroup_ext = {
@@ -25,10 +26,10 @@ cgroup_ext = {
     'link': ['lxc.network.link', '^[\w.-/]+$', 'Link name updated'],
     'flags': ['lxc.network.flags', '^(up|down)$', 'Network flag updated'],
     'hwaddr': ['lxc.network.hwaddr', '^[0-9a-fA-F:]+$', 'Hardware address updated'],
-    'ipv4': ['lxc.network.ipv4', ip_regex, 'IPv4 address updated'],
+    'ipv4': ['lxc.network.ipv4', cidr_regex, 'IPv4 address updated'],
     'ipv4gw': ['lxc.network.ipv4.gateway', ip_regex, 'IPv4 gateway address updated'],
-    'ipv6': ['lxc.network.ipv6', '^[0-9a-f:]+$', 'IPv6 address updated'],  # weak ipv6 regex check
-    'ipv6gw': ['lxc.network.ipv6.gateway', '[0-9a-f:]+^$', 'IPv6 gateway address updated'],
+    'ipv6': ['lxc.network.ipv6', '^([0-9a-fA-F:/]+)+$', 'IPv6 address updated'],  # weak ipv6 regex check
+    'ipv6gw': ['lxc.network.ipv6.gateway', '^([0-9a-fA-F:]+)+$', 'IPv6 gateway address updated'],
     'script_up': ['lxc.network.script.up', file_match, 'Network script down updated'],
     'script_down': ['lxc.network.script.down', file_match, 'Network script down updated'],
     'rootfs': ['lxc.rootfs', file_match, 'Rootfs updated'],
@@ -121,7 +122,13 @@ def check_session_limit():
         last_activity = session.get('last_activity')
         if last_activity < limit:
             flash(u'Session timed out !', 'info')
-            redirect(url_for('auth.logout'))
+            session.pop('logged_in', None)
+            session.pop('token', None)
+            session.pop('last_activity', None)
+            session.pop('username', None)
+            session.pop('name', None)
+            session.pop('su', None)
+            flash(u'You are logged out!', 'success')
         else:
             session['last_activity'] = now
 
